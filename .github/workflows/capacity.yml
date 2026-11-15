@@ -1,5 +1,5 @@
 # ЛР 2.1, задача 3: ёмкость спринта (аналог вкладки Capacity в Azure Boards).
-# Нужен секрет репозитория PROJECT_TOKEN — PAT с областями read:project и repo:
+# Нужен секрет PROJECT_TOKEN (PAT с областями read:project и repo) или токен DEMOGEN_TOKEN из ЛР 2.0:
 # GITHUB_TOKEN не имеет доступа к проектам организации.
 name: Ёмкость спринта
 
@@ -33,6 +33,6 @@ jobs:
 
       - name: Расчёт ёмкости (результат — в сводке запуска)
         env:
-          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN || secrets.DEMOGEN_TOKEN }}
           ITERATION: ${{ inputs.iteration }}
         run: python tools/capacity/capacity.py --config tools/capacity/capacity.json --iteration "$ITERATION"
