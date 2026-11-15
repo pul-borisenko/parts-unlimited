@@ -1,0 +1,18 @@
+# Сборка .NET
+bin/
+obj/
+out/
+TestResults/
+*.user
+*.suo
+.vs/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Отчёты генератора и локальные секреты
+ghdemogen-*.json
+.env

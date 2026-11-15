@@ -1,0 +1,34 @@
+name: Ошибка (Bug)
+description: Сообщить об ошибке на сайте Parts Unlimited
+title: "Ошибка: "
+type: Bug
+labels: ["bug"]
+body:
+  - type: input
+    id: ticket
+    attributes:
+      label: PUL Ticket ID
+      description: Номер обращения клиента, если ошибка пришла из поддержки
+      placeholder: PUL-1234
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      value: |
+        1.
+        2.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемый и фактический результат
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Серьёзность
+      options: ["Критическая", "Высокая", "Средняя", "Низкая"]
+    validations:
+      required: true

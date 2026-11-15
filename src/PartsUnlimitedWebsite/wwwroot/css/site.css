@@ -1,0 +1,16 @@
+:root { --accent: #c0392b; --muted: #6b6b6b; --ok: #1e7b34; font-family: system-ui, sans-serif; }
+body { margin: 0; color: #1d1d1d; background: #fafafa; }
+header.top { display: flex; gap: 1rem; align-items: center; justify-content: space-between; padding: .75rem 1.5rem; background: #1d1d1d; }
+header.top .brand { color: #fff; font-weight: 700; text-decoration: none; font-size: 1.2rem; }
+form.search, form.filters { display: flex; gap: .5rem; }
+input, select, button { font: inherit; padding: .4rem .6rem; }
+button { background: var(--accent); color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+main { max-width: 960px; margin: 0 auto; padding: 1.5rem; }
+.hero { padding: 1rem 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.card { background: #fff; border: 1px solid #e3e3e3; border-radius: 6px; padding: 1rem; }
+.card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.price { font-weight: 700; font-size: 1.1rem; }
+.muted { color: var(--muted); }
+.ok { color: var(--ok); }
+footer { text-align: center; color: var(--muted); padding: 2rem 0; }

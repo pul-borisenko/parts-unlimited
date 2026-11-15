@@ -1,0 +1,44 @@
+# ЛР 2.0: генерация тестовых данных (аналог Azure DevOps Demo Generator).
+# Нужен секрет репозитория DEMOGEN_TOKEN — Personal Access Token (classic)
+# со сроком 7 дней и областями repo, project, admin:org.
+name: Тестовые данные (ЛР 2.0)
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Название проекта GitHub Projects'
+        default: 'Unlimited Parts'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Генерация по шаблону Parts Unlimited
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Moscow   # спринты отсчитываются от московской даты
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Генерация
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEMOGEN_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PROJECT: ${{ inputs.project }}
+        run: python tools/generator/ghdemogen.py --owner "$OWNER" --repo "$REPO" --project "$PROJECT" --yes --result-dir out
+
+      - name: Отчёт генератора
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ghdemogen-result
+          path: out
+          if-no-files-found: ignore

@@ -1,0 +1,25 @@
+{
+  "owner": "pul-borisenko",
+  "projectNumber": 1,
+  "fields": {
+    "iteration": "Спринт",
+    "remaining": "Остаток",
+    "activity": "Активность",
+    "status": "Status"
+  },
+  "doneStatuses": ["Готово"],
+  "workdays": [1, 2, 3, 4, 5],
+  "teamDaysOff": [
+    {"from": "2026-12-31", "to": "2027-01-08", "reason": "Новогодние праздники"}
+  ],
+  "members": [
+    {
+      "login": "ArtemBorisenk0",
+      "hoursPerDay": 1,
+      "activity": "Разработка",
+      "daysOff": [
+        {"from": "2026-11-23", "to": "2026-11-27", "reason": "Отпуск (ЛР 2.1, задача 3, шаг 7)"}
+      ]
+    }
+  ]
+}

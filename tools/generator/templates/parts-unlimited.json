@@ -1,0 +1,158 @@
+{
+  "name": "Parts Unlimited",
+  "description": "Интернет-магазин автозапчастей: эпики, функции, элементы бэклога (PBI), задачи и ошибки на 6 двухнедельных спринтов. Аналог шаблона Parts Unlimited из Azure DevOps Demo Generator.",
+  "repository": {
+    "description": "Parts Unlimited — учебный интернет-магазин автозапчастей (ЛР «Программная инженерия»)"
+  },
+  "sprints": {
+    "count": 6,
+    "lengthDays": 14,
+    "titlePattern": "Sprint {n}",
+    "current": 2
+  },
+  "fieldNames": {
+    "status": "Status",
+    "sprint": "Спринт",
+    "area": "Область",
+    "effort": "Оценка",
+    "remaining": "Остаток",
+    "activity": "Активность",
+    "start": "Начало",
+    "end": "Окончание"
+  },
+  "status": [
+    {"key": "new", "name": "Новое", "color": "GRAY", "description": "New / To Do — элемент создан, ещё не взят в работу"},
+    {"key": "approved", "name": "Утверждено", "color": "BLUE", "description": "Approved — владелец продукта утвердил элемент"},
+    {"key": "committed", "name": "В работе (Committed)", "color": "YELLOW", "description": "Committed / In Progress — команда взяла элемент в спринт"},
+    {"key": "done", "name": "Готово", "color": "GREEN", "description": "Done — выполнено и принято"}
+  ],
+  "areas": [
+    {"name": "Unlimited Parts", "color": "BLUE", "description": "Корневая область проекта (команда Unlimited Parts Team)"}
+  ],
+  "activities": [
+    {"name": "Разработка", "color": "GREEN", "description": "Development"},
+    {"name": "Дизайн", "color": "PURPLE", "description": "Design"},
+    {"name": "Тестирование", "color": "YELLOW", "description": "Testing"},
+    {"name": "Документация", "color": "BLUE", "description": "Documentation"},
+    {"name": "Развёртывание", "color": "ORANGE", "description": "Deployment"},
+    {"name": "Требования", "color": "GRAY", "description": "Requirements"}
+  ],
+  "issueTypes": [
+    {"name": "Epic", "color": "purple", "description": "Эпик — бизнес-инициатива верхнего уровня"},
+    {"name": "Feature", "color": "blue", "description": "Функция — крупная функциональность из нескольких элементов бэклога"},
+    {"name": "PBI", "color": "green", "description": "Product Backlog Item — элемент бэклога продукта (пользовательская история)"},
+    {"name": "Task", "color": "yellow", "description": "Задача — техническая работа внутри элемента бэклога"},
+    {"name": "Bug", "color": "red", "description": "Ошибка"}
+  ],
+  "labels": [
+    {"name": "bug", "color": "d73a4a", "description": "Что-то работает не так"},
+    {"name": "web", "color": "1d76db", "description": "Веб-сайт магазина"},
+    {"name": "api", "color": "5319e7", "description": "Серверный API"},
+    {"name": "mobile", "color": "fbca04", "description": "Мобильная версия"},
+    {"name": "security", "color": "b60205", "description": "Безопасность и платежи"}
+  ],
+  "milestones": [
+    {"title": "Релиз 1.0", "endOfSprint": 3, "description": "Первый публичный релиз магазина"},
+    {"title": "Релиз 1.1", "endOfSprint": 5, "description": "Доставка, личный кабинет, мобильная версия"}
+  ],
+  "items": [
+    {"type": "Epic", "title": "Каталог и витрина магазина", "labels": ["web"],
+     "body": "Клиент быстро находит нужную запчасть и видит актуальные предложения.",
+     "children": [
+       {"type": "Feature", "title": "Поиск запчастей", "labels": ["web"],
+        "body": "Поиск по названию, артикулу и марке автомобиля.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу искать запчасти по названию и артикулу", "sprint": 1, "status": "done", "effort": 5, "milestone": "Релиз 1.0", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [x] поиск без учёта регистра\n- [x] поиск по артикулу\n- [x] пустой запрос не вызывает ошибку",
+           "children": [
+             {"type": "Task", "title": "Индекс поиска по названию и артикулу", "sprint": 1, "status": "done", "remaining": 0, "activity": "Разработка"},
+             {"type": "Task", "title": "Обработка пустого поискового запроса", "sprint": 1, "status": "done", "remaining": 0, "activity": "Разработка"}
+           ]},
+          {"type": "PBI", "title": "Как клиент, я хочу фильтровать запчасти по марке автомобиля", "sprint": 2, "status": "committed", "effort": 3, "milestone": "Релиз 1.0", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] список марок берётся из каталога\n- [ ] фильтр сочетается с поиском",
+           "children": [
+             {"type": "Task", "title": "Фильтр по марке в сервисе каталога", "sprint": 2, "status": "committed", "remaining": 4, "activity": "Разработка", "assignMe": true},
+             {"type": "Task", "title": "Тесты фильтрации по марке", "sprint": 2, "status": "new", "remaining": 2, "activity": "Тестирование"}
+           ]},
+          {"type": "Bug", "title": "Ошибка 500 при пустом поисковом запросе", "sprint": 1, "status": "done", "effort": 1, "labels": ["bug", "web"],
+           "body": "Шаги: открыть /Home/Search без параметра q.\nОжидается: пустой результат. Фактически: ошибка 500."}
+        ]},
+       {"type": "Feature", "title": "Главная страница", "labels": ["web"],
+        "body": "Главная страница показывает рекомендуемые товары и наличие.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу видеть рекомендуемые товары на главной странице", "sprint": 2, "status": "approved", "effort": 5, "milestone": "Релиз 1.0", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] показываются 4 товара в наличии\n- [ ] у каждого товара цена и кнопка «Подробнее»",
+           "children": [
+             {"type": "Task", "title": "Вывод рекомендуемых товаров", "sprint": 2, "status": "new", "remaining": 6, "activity": "Разработка"},
+             {"type": "Task", "title": "Макет блока рекомендаций", "sprint": 2, "status": "new", "remaining": 2, "activity": "Дизайн"}
+           ]},
+          {"type": "PBI", "title": "Как клиент, я хочу видеть наличие товара на складе", "sprint": 3, "status": "new", "effort": 3, "milestone": "Релиз 1.0", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] «В наличии» / «Под заказ» на карточке товара"}
+        ]}
+     ]},
+    {"type": "Epic", "title": "Корзина и оформление заказа", "labels": ["web"],
+     "body": "Клиент без ошибок собирает корзину и оплачивает заказ.",
+     "children": [
+       {"type": "Feature", "title": "Корзина", "labels": ["web"],
+        "body": "Хранение корзины, промокоды, пересчёт суммы.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу сохранять корзину между посещениями", "sprint": 1, "status": "done", "effort": 3, "milestone": "Релиз 1.0", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [x] корзина восстанавливается после повторного входа"},
+          {"type": "PBI", "title": "Как клиент, я хочу применять промокод в корзине", "sprint": 2, "status": "committed", "effort": 2, "milestone": "Релиз 1.0", "labels": ["web", "api"],
+           "body": "Критерии приёмки:\n- [ ] скидка пересчитывается сразу\n- [ ] просроченный промокод отклоняется с сообщением",
+           "children": [
+             {"type": "Task", "title": "Проверка промокода на сервере", "sprint": 2, "status": "committed", "remaining": 3, "activity": "Разработка"},
+             {"type": "Task", "title": "Сценарии тестирования промокодов", "sprint": 2, "status": "new", "remaining": 2, "activity": "Тестирование"}
+           ]},
+          {"type": "Bug", "title": "Неверная сумма корзины после удаления товара", "sprint": 2, "status": "committed", "effort": 2, "labels": ["bug", "web"],
+           "body": "Шаги: добавить два товара, удалить один.\nОжидается: сумма уменьшается. Фактически: сумма не меняется до перезагрузки."}
+        ]},
+       {"type": "Feature", "title": "Оплата", "labels": ["security"],
+        "body": "Онлайн-оплата и чеки.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу оплачивать заказ банковской картой", "sprint": 3, "status": "approved", "effort": 8, "milestone": "Релиз 1.0", "labels": ["security", "api"],
+           "body": "Критерии приёмки:\n- [ ] данные карты не хранятся на нашем сервере\n- [ ] неуспешная оплата не создаёт заказ"},
+          {"type": "PBI", "title": "Как клиент, я хочу получать электронный чек на почту", "sprint": 4, "status": "new", "effort": 3, "milestone": "Релиз 1.1", "labels": ["api"],
+           "body": "Критерии приёмки:\n- [ ] чек приходит в течение 5 минут после оплаты"}
+        ]}
+     ]},
+    {"type": "Epic", "title": "Доставка и отслеживание", "labels": ["api"],
+     "body": "Клиент знает, где его заказ, и может выбрать удобный пункт выдачи.",
+     "children": [
+       {"type": "Feature", "title": "Отслеживание заказов", "labels": ["api"],
+        "body": "Статусы доставки от службы доставки.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу отслеживать статус доставки заказа", "sprint": 1, "status": "committed", "effort": 8, "milestone": "Релиз 1.0", "labels": ["api", "web"],
+           "body": "Зависит от интеграции с данными службы доставки (команда External integrations, ЛР 3).\nКритерии приёмки:\n- [ ] статус обновляется не реже раза в час"},
+          {"type": "PBI", "title": "Как клиент, я хочу получать уведомления о смене статуса заказа", "sprint": 4, "status": "new", "effort": 5, "milestone": "Релиз 1.1", "labels": ["api"],
+           "body": "Критерии приёмки:\n- [ ] письмо при отправке и при поступлении в пункт выдачи"}
+        ]},
+       {"type": "Feature", "title": "Пункты выдачи", "labels": ["web"],
+        "body": "Выбор пункта выдачи при оформлении заказа.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу выбрать пункт выдачи на карте", "sprint": 5, "status": "new", "effort": 5, "milestone": "Релиз 1.1", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] на карте видны ближайшие пункты и часы работы"}
+        ]}
+     ]},
+    {"type": "Epic", "title": "Личный кабинет", "labels": ["web"],
+     "body": "Клиент управляет своими заказами и пользуется сайтом с любого устройства.",
+     "children": [
+       {"type": "Feature", "title": "История заказов", "labels": ["web"],
+        "body": "Просмотр и повтор прошлых заказов.",
+        "children": [
+          {"type": "PBI", "title": "Как клиент, я хочу просматривать историю заказов", "sprint": 3, "status": "new", "effort": 3, "milestone": "Релиз 1.1", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] заказы отсортированы по дате, новые сверху"},
+          {"type": "PBI", "title": "Как клиент, я хочу повторить прошлый заказ в один клик", "sprint": 5, "status": "new", "effort": 2, "milestone": "Релиз 1.1", "labels": ["web"],
+           "body": "Критерии приёмки:\n- [ ] товары прошлого заказа добавляются в корзину"}
+        ]},
+       {"type": "Feature", "title": "Мобильная версия", "labels": ["mobile"],
+        "body": "Адаптивная вёрстка и быстрая загрузка на телефонах.",
+        "children": [
+          {"type": "Bug", "title": "Изображения каталога не загружаются на мобильных устройствах", "sprint": 2, "status": "new", "effort": 3, "labels": ["bug", "mobile"],
+           "body": "Шаги: открыть каталог в мобильном браузере.\nОжидается: фото товаров. Фактически: пустые рамки."},
+          {"type": "PBI", "title": "Как клиент, я хочу удобно пользоваться сайтом с телефона", "sprint": 4, "status": "new", "effort": 8, "milestone": "Релиз 1.1", "labels": ["mobile"],
+           "body": "Критерии приёмки:\n- [ ] все страницы читаются без горизонтальной прокрутки на экране 360 px"}
+        ]}
+     ]}
+  ]
+}

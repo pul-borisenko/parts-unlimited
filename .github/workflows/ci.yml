@@ -1,0 +1,88 @@
+# ЛР 4.1: непрерывная интеграция (аналог классического конвейера сборки ASP.NET в Azure Pipelines).
+#
+# Где выполняется сборка:
+#   * pull request (в том числе из форков) — всегда на облачном раннере GitHub: чужой код
+#     не попадает на ваш компьютер (угроза удалённого выполнения кода из ЛР 4.0);
+#   * push в main и ручной запуск — на self-hosted раннере из ЛР 4.0, если в репозитории
+#     задана переменная USE_SELF_HOSTED = true (Settings → Secrets and variables → Actions → Variables);
+#     иначе на облачном раннере ubuntu-latest (в публичном репозитории это бесплатно).
+name: CI — сборка и тесты
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'tools/capacity/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'Где выполнить сборку'
+        type: choice
+        options: [auto, self-hosted, github-hosted]
+        default: auto
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_CONFIGURATION: ${{ vars.BUILD_CONFIGURATION || 'Release' }}
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+
+jobs:
+  build:
+    name: Сборка и тесты
+    runs-on: ${{ (github.event_name == 'pull_request' || inputs.runner == 'github-hosted' || (vars.USE_SELF_HOSTED != 'true' && inputs.runner != 'self-hosted')) && 'ubuntu-latest' || fromJSON('["self-hosted", "pul-build"]') }}
+    timeout-minutes: 20
+    steps:
+      - name: Сведения о раннере
+        shell: bash
+        run: |
+          echo "Раннер: ${{ runner.name }} (${{ runner.os }}, ${{ runner.arch }})"
+          echo "Событие: ${{ github.event_name }}, коммит ${{ github.sha }}"
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Восстановление пакетов NuGet
+        run: dotnet restore PartsUnlimited.slnx
+
+      - name: Сборка
+        run: dotnet build PartsUnlimited.slnx --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+
+      - name: Тесты
+        run: >-
+          dotnet test PartsUnlimited.slnx --no-build --configuration ${{ env.BUILD_CONFIGURATION }}
+          --logger GitHubActions
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory TestResults
+
+      - name: Публикация сайта
+        run: >-
+          dotnet publish src/PartsUnlimitedWebsite/PartsUnlimitedWebsite.csproj --no-build
+          --configuration ${{ env.BUILD_CONFIGURATION }} --output out/site
+
+      - name: Артефакт — результаты тестов
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: TestResults
+          retention-days: 14
+
+      - name: Артефакт — собранный сайт
+        uses: actions/upload-artifact@v7
+        with:
+          name: parts-unlimited-site
+          path: out/site
+          retention-days: 30

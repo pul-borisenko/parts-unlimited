@@ -1,0 +1,41 @@
+# ЛР 2.2, задача 6: настройка процесса. Форма элемента бэклога (PBI) с полем «PUL Ticket ID».
+# Тип задачи PBI должен существовать в организации (создаёт генератор из ЛР 2.0).
+name: Элемент бэклога (PBI)
+description: Пользовательская история для бэклога продукта Parts Unlimited
+title: "Как клиент, я хочу "
+type: PBI
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите историю в формате «Как <роль>, я хочу <действие>, чтобы <ценность>».
+  - type: input
+    id: ticket
+    attributes:
+      label: PUL Ticket ID
+      description: Внешний идентификатор тикета в системе поддержки Parts Unlimited
+      placeholder: PUL-1234
+    validations:
+      required: false
+  - type: textarea
+    id: story
+    attributes:
+      label: Описание истории
+      placeholder: Как клиент, я хочу ..., чтобы ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии приёмки
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Оценка (story points)
+      options: ["1", "2", "3", "5", "8", "13"]
+    validations:
+      required: false

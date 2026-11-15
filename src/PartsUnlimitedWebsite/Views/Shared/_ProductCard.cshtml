@@ -1,0 +1,7 @@
+@model Product
+<article class="card">
+    <h3><a asp-controller="Home" asp-action="Product" asp-route-id="@Model.Id">@Model.Title</a></h3>
+    <p class="muted">@Model.Category · @Model.CarMake · арт. @Model.Sku</p>
+    <p class="price">@Model.Price.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("ru-RU")) ₽</p>
+    <p class="@(Model.InStock ? "ok" : "muted")">@(Model.InStock ? "В наличии" : "Под заказ")</p>
+</article>

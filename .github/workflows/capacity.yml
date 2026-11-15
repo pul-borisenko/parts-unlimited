@@ -1,0 +1,38 @@
+# ЛР 2.1, задача 3: ёмкость спринта (аналог вкладки Capacity в Azure Boards).
+# Нужен секрет репозитория PROJECT_TOKEN — PAT с областями read:project и repo:
+# GITHUB_TOKEN не имеет доступа к проектам организации.
+name: Ёмкость спринта
+
+on:
+  workflow_dispatch:
+    inputs:
+      iteration:
+        description: 'Итерация (пусто — текущая), например Sprint 2'
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths:
+      - tools/capacity/capacity.json
+
+permissions:
+  contents: read
+
+jobs:
+  capacity:
+    name: Сравнить ёмкость и остаток работы
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Moscow   # «сегодня» по московскому времени
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Расчёт ёмкости (результат — в сводке запуска)
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ITERATION: ${{ inputs.iteration }}
+        run: python tools/capacity/capacity.py --config tools/capacity/capacity.json --iteration "$ITERATION"

@@ -1,0 +1,6 @@
+@model Product
+@{
+    ViewData["Title"] = Model.Title;
+}
+<a asp-action="Index">← На главную</a>
+<partial name="_ProductCard" model="Model" />

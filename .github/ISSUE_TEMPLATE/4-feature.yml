@@ -1,0 +1,14 @@
+name: Функция (Feature)
+description: Крупная функциональность, объединяющая несколько элементов бэклога
+type: Feature
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Цель функции
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Границы (что входит и что не входит)

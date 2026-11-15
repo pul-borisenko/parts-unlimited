@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — Parts Unlimited</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="top">
+        <a class="brand" asp-controller="Home" asp-action="Index">Parts Unlimited</a>
+        <form class="search" asp-controller="Home" asp-action="Search" method="get">
+            <input type="search" name="q" placeholder="Название или артикул" aria-label="Поиск запчастей" />
+            <button type="submit">Найти</button>
+        </form>
+    </header>
+    <main>
+        @RenderBody()
+    </main>
+    <footer>Учебный проект по дисциплине «Программная инженерия»</footer>
+</body>
+</html>

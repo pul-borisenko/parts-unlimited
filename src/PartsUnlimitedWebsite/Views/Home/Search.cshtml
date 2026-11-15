@@ -1,0 +1,38 @@
+@model IReadOnlyList<Product>
+@{
+    ViewData["Title"] = "Поиск";
+    var query = ViewData["Query"] as string;
+    var make = ViewData["Make"] as string;
+    var makes = ViewData["Makes"] as IReadOnlyList<string> ?? [];
+}
+<h1>Поиск запчастей</h1>
+<form class="filters" method="get">
+    <input type="search" name="q" value="@query" placeholder="Название или артикул" aria-label="Запрос" />
+    <select name="make" aria-label="Марка автомобиля">
+        <option value="">Все марки</option>
+        @foreach (var m in makes)
+        {
+            <option value="@m" selected="@(m == make)">@m</option>
+        }
+    </select>
+    <button type="submit">Найти</button>
+</form>
+
+@if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(make))
+{
+    <p class="muted">Введите запрос или выберите марку.</p>
+}
+else if (Model.Count == 0)
+{
+    <p>Ничего не найдено.</p>
+}
+else
+{
+    <p class="muted">Найдено: @Model.Count</p>
+    <div class="grid">
+        @foreach (var product in Model)
+        {
+            <partial name="_ProductCard" model="product" />
+        }
+    </div>
+}

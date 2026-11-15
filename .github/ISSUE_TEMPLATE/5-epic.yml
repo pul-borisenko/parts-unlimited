@@ -1,0 +1,14 @@
+name: Эпик (Epic)
+description: Бизнес-инициатива верхнего уровня
+type: Epic
+body:
+  - type: textarea
+    id: value
+    attributes:
+      label: Бизнес-ценность
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Как измерим успех

@@ -1,0 +1,17 @@
+@model IReadOnlyList<Product>
+@{
+    // ЛР 4.1, задача 3: измените заголовок документа, закоммитьте — сборка CI запустится сама.
+    ViewData["Title"] = "Главная";
+}
+<section class="hero">
+    <h1>Автозапчасти с доставкой</h1>
+    <p>Подберите детали по названию, артикулу или марке автомобиля.</p>
+</section>
+
+<h2>Рекомендуем</h2>
+<div class="grid">
+    @foreach (var product in Model)
+    {
+        <partial name="_ProductCard" model="product" />
+    }
+</div>
