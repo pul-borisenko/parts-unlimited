@@ -726,6 +726,7 @@ class Generator:
             "issues": self.created,
             "warnings": self.warnings,
         }
+        directory.mkdir(parents=True, exist_ok=True)
         path = directory / f"ghdemogen-{self.owner}-{self.repo_name}.json"
         path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
         return path
