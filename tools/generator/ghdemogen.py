@@ -239,6 +239,13 @@ mutation($input: AddProjectV2ItemByIdInput!) {
   addProjectV2ItemById(input: $input) { item { id } }
 }"""
 
+Q_ISSUE_ITEMS = """
+query($id: ID!) {
+  node(id: $id) {
+    ... on Issue { projectItems(first: 50, includeArchived: true) { nodes { id project { id } } } }
+  }
+}"""
+
 
 def build_field_values_mutation(count: int) -> str:
     """Одна мутация на все поля элемента: меньше запросов — меньше риск ограничений частоты."""
@@ -623,6 +630,9 @@ class Generator:
         flat = list(walk(self.tpl["items"]))
         info(f"[7/8] Создание задач: {len(flat)} шт. (с паузами, чтобы не упереться в ограничения GitHub)")
         records: dict[int, dict[str, Any]] = {}
+        previous = self._existing_generated(repo_path, marker)
+        if previous:
+            info(f"      Найдены задачи от прошлого запуска: {len(previous)} — используем их, дубликаты не создаём")
         for index, (item, parent) in enumerate(flat, start=1):
             labels = list(item.get("labels", []))
             body: dict[str, Any] = {"title": item["title"], "body": (item.get("body", "") + "\n\n" + marker).strip()}
@@ -636,8 +646,12 @@ class Generator:
                 body["milestone"] = self.milestones[item["milestone"]]
             if item.get("assignMe"):
                 body["assignees"] = [self.login]
-            issue = self.gh.rest("POST", f"{repo_path}/issues", body, expected=(201,))
-            self.gh.pause()
+            reused = previous.pop(item["title"], None)
+            if reused is not None:
+                issue = reused
+            else:
+                issue = self.gh.rest("POST", f"{repo_path}/issues", body, expected=(201,))
+                self.gh.pause()
             record = {"title": item["title"], "type": item["type"], "number": issue["number"],
                       "url": issue["html_url"], "parent": None}
             records[id(item)] = {**record, "id": issue["id"]}
@@ -646,17 +660,16 @@ class Generator:
                 status, data = self.gh.rest_status("POST", f"{repo_path}/issues/{parent_rec['number']}/sub_issues",
                                                    {"sub_issue_id": issue["id"]})
                 self.gh.pause()
-                if status in (200, 201):
+                if status in (200, 201) or reused is not None:
+                    # у задачи из прошлого запуска связь обычно уже есть — GitHub отвечает 422
                     record["parent"] = parent_rec["number"]
                 else:
                     self._warn(f"#{issue['number']}: не удалось сделать подзадачей #{parent_rec['number']}: HTTP {status}")
-            if derive_status(item) == "done":
+            if derive_status(item) == "done" and issue.get("state") != "closed":
                 self.gh.rest("PATCH", f"{repo_path}/issues/{issue['number']}",
                              {"state": "closed", "state_reason": "completed"}, expected=(200,))
                 self.gh.pause()
-            added = self.gh.graphql(M_ADD_ITEM, {"input": {"projectId": self.project["id"], "contentId": issue["node_id"]}})
-            self.gh.pause()
-            item_id = added["addProjectV2ItemById"]["item"]["id"]
+            item_id = self._add_to_project(issue["node_id"])
             values = self._values_for(item)
             if values:
                 variables: dict[str, Any] = {"project": self.project["id"], "item": item_id}
@@ -666,7 +679,40 @@ class Generator:
                 self.gh.graphql(build_field_values_mutation(len(values)), variables)
                 self.gh.pause()
             self.created.append(record)
-            info(f"      {index:>2}/{len(flat)} #{issue['number']:<4} {item['type']:<8} {item['title']}")
+            suffix = " (уже была)" if reused is not None else ""
+            info(f"      {index:>2}/{len(flat)} #{issue['number']:<4} {item['type']:<8} {item['title']}{suffix}")
+
+    def _existing_generated(self, repo_path: str, marker: str) -> dict[str, dict[str, Any]]:
+        """Задачи, созданные прошлым (прерванным) запуском: повторный запуск их дополняет, а не дублирует."""
+        found: dict[str, dict[str, Any]] = {}
+        for issue in self.gh.paginate(f"{repo_path}/issues?state=all&sort=created&direction=asc"):
+            if "pull_request" in issue or marker not in (issue.get("body") or ""):
+                continue
+            found.setdefault(issue["title"], issue)
+        return found
+
+    def _add_to_project(self, content_id: str) -> str:
+        """Добавляет задачу в проект и возвращает id элемента.
+
+        Если в проекте включено правило Auto-add, GitHub может добавить задачу сам, одновременно
+        со скриптом, — тогда мутация отвечает «Content already exists in this project».
+        В этом случае берём уже существующий элемент.
+        """
+        for attempt in range(1, 5):
+            try:
+                added = self.gh.graphql(M_ADD_ITEM, {"input": {"projectId": self.project["id"], "contentId": content_id}})
+                self.gh.pause()
+                return added["addProjectV2ItemById"]["item"]["id"]
+            except GitHubError as exc:
+                if "already exists" not in str(exc):
+                    raise
+            self.gh.pause()
+            data = self.gh.graphql(Q_ISSUE_ITEMS, {"id": content_id})
+            for node in ((data.get("node") or {}).get("projectItems") or {}).get("nodes", []):
+                if node and node.get("project", {}).get("id") == self.project["id"]:
+                    return node["id"]
+            time.sleep(2 * attempt)
+        raise GitHubError(0, "не удалось получить элемент проекта для задачи — повторите запуск")
 
     # -- шаг 8: итог
     def write_result(self, directory: Path) -> Path:
@@ -823,7 +869,7 @@ def main(argv: list[str] | None = None) -> int:
         elif exc.status == 403:
             info("Недостаточно прав: нужны области repo, project, admin:org и роль владельца организации.")
         if gen.created:
-            info(f"Уже создано задач: {len(gen.created)}. Повторный запуск создаст их заново — удалите лишние или смените --repo.")
+            info(f"Уже создано задач: {len(gen.created)}. Повторный запуск с теми же параметрами продолжит с места остановки (созданные задачи не дублируются).")
         return 1
     return 0
 
