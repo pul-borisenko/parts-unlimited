@@ -42,15 +42,20 @@ jobs:
     runs-on: ${{ (github.event_name == 'pull_request' || inputs.runner == 'github-hosted' || (vars.USE_SELF_HOSTED != 'true' && inputs.runner != 'self-hosted')) && 'ubuntu-latest' || fromJSON('["self-hosted", "pul-build"]') }}
     timeout-minutes: 20
     steps:
+      # Без shell: bash — на Windows-раннере из ЛР 4.0 bash может отсутствовать;
+      # echo одинаково работает в bash (Linux) и PowerShell (Windows).
       - name: Сведения о раннере
-        shell: bash
         run: |
           echo "Раннер: ${{ runner.name }} (${{ runner.os }}, ${{ runner.arch }})"
           echo "Событие: ${{ github.event_name }}, коммит ${{ github.sha }}"
 
       - uses: actions/checkout@v7
 
+      # SDK ставится в кэш инструментов раннера: служба self-hosted раннера работает
+      # под NETWORK SERVICE и не может писать в C:\Program Files\dotnet (каталог по умолчанию).
       - uses: actions/setup-dotnet@v6
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
         with:
           dotnet-version: '10.0.x'
 
