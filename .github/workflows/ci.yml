@@ -43,11 +43,12 @@ jobs:
     timeout-minutes: 20
     steps:
       # Без shell: bash — на Windows-раннере из ЛР 4.0 bash может отсутствовать;
-      # echo одинаково работает в bash (Linux) и PowerShell (Windows).
+      # echo одинаково работает в bash (Linux) и PowerShell (Windows). Текст латиницей:
+      # Windows PowerShell 5.1 читает файл шага в кодировке ANSI и искажает кириллицу.
       - name: Сведения о раннере
         run: |
-          echo "Раннер: ${{ runner.name }} (${{ runner.os }}, ${{ runner.arch }})"
-          echo "Событие: ${{ github.event_name }}, коммит ${{ github.sha }}"
+          echo "Runner: ${{ runner.name }} (${{ runner.os }}, ${{ runner.arch }})"
+          echo "Event: ${{ github.event_name }}, commit ${{ github.sha }}"
 
       - uses: actions/checkout@v7
 
